@@ -3,22 +3,26 @@ package com.yxf.refactoring.patterns.chapter8;
 import com.yxf.refactoring.patterns.chapter8.exception.QueryException;
 
 public class Client {
-    private Query query;
+    private AbstractQuery query;
 
     public static void main(String[] args) {
         Client client = new Client();
-        client.loginToDatabase("user.db", "user", "123");
+        client.query();
+    }
+
+    public void query() {
+        loginToDatabase("user.db", "user", "123");
+        doQuery();
     }
 
     public void loginToDatabase(String db, String user, String password) {
+        if (usingSDVersion52()) {
+            query = new QuerySD52(getSD52ConfigFileName());
+        } else {
+            query = new QuerySD51();
+        }
         try {
-            if (usingSDVersion52()) {
-                query = new Query();
-                query.login(db, user, password, getSD52ConfigFileName());  // Login to SD 5.2
-            } else {
-                query = new QuerySD51();
-                query.login(db, user, password); // Login to SD 5.1
-            }
+            query.login(db, user, password);
         } catch (QueryException qe) {
             qe.printStackTrace();
         }
@@ -29,6 +33,10 @@ public class Client {
     }
 
     private boolean usingSDVersion52() {
-        return true;
+        return false;
+    }
+
+    public void doQuery() {
+        query.doQuery();
     }
 }
